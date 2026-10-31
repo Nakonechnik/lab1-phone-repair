@@ -19,11 +19,16 @@ class RepairTicketViewModel : ViewModel() {
     fun finishDiagnostics() {
         if (!ticket.canFinishDiagnostics) return
         val estimate = ticket.severity * 2500
+        val partsAvailable = ticket.severity <= 2
         ticket = ticket.copy(
             diagnosticsDone = true,
             estimateRub = estimate,
-            status = TicketStatus.WAITING_PARTS,
-            partsInStock = ticket.severity <= 2
+            partsInStock = partsAvailable,
+            status = if (partsAvailable) {
+                TicketStatus.DIAGNOSING
+            } else {
+                TicketStatus.WAITING_PARTS
+            }
         )
     }
 

@@ -170,28 +170,33 @@ fun RepairTicketScreen(viewModel: RepairTicketViewModel) {
 
 @Composable
 private fun StatusBanner(ticket: RepairTicket) {
-    val (bg, fg, message) = when (ticket.status) {
-        TicketStatus.WAITING_PARTS -> Triple(
+    val (bg, fg, message) = when {
+        ticket.status == TicketStatus.WAITING_PARTS -> Triple(
             WarningAmber,
             Color.White,
             "Внимание: ремонт нельзя начать, пока нет запчастей, согласия клиента и оплаты (или гарантии)."
         )
-        TicketStatus.READY -> Triple(
+        ticket.status == TicketStatus.DIAGNOSING && ticket.diagnosticsDone -> Triple(
+            PrimaryBlueBanner,
+            Color.White,
+            "Запчасти уже на складе. Нужны согласие клиента и оплата (или гарантия)."
+        )
+        ticket.status == TicketStatus.READY -> Triple(
             ReadyGreen,
             Color.White,
             "Устройство отремонтировано и готово к выдаче."
         )
-        TicketStatus.REJECTED -> Triple(
+        ticket.status == TicketStatus.REJECTED -> Triple(
             DangerRed,
             Color.White,
             "Заявка отклонена. Доступно только действие сброса."
         )
-        TicketStatus.ISSUED -> Triple(
+        ticket.status == TicketStatus.ISSUED -> Triple(
             MutedGray,
             Color.White,
             "Работа по заявке завершена. Устройство выдано клиенту."
         )
-        TicketStatus.REPAIRING -> Triple(
+        ticket.status == TicketStatus.REPAIRING -> Triple(
             PrimaryBlueBanner,
             Color.White,
             "Идёт ремонт. Изменение условий заявки заблокировано."
@@ -269,19 +274,20 @@ private fun SeverityControls(
     onMinus: () -> Unit,
     onPlus: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text("Сложность повреждения")
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             OutlinedButton(onClick = onMinus, enabled = enabled && severity > 1) {
-                Text("−")
+                Text("-")
             }
             Text(
                 text = "$severity",
-                modifier = Modifier.padding(horizontal = 12.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 fontWeight = FontWeight.Bold
             )
             OutlinedButton(onClick = onPlus, enabled = enabled && severity < 5) {

@@ -26,7 +26,7 @@ data class RepairTicket(
         get() = status == TicketStatus.NEW
 
     val canFinishDiagnostics: Boolean
-        get() = status == TicketStatus.DIAGNOSING
+        get() = status == TicketStatus.DIAGNOSING && !diagnosticsDone
 
     val canMarkPartsArrived: Boolean
         get() = status == TicketStatus.WAITING_PARTS && !partsInStock
@@ -39,10 +39,9 @@ data class RepairTicket(
 
     val canPay: Boolean
         get() = status in listOf(
-            TicketStatus.WAITING_PARTS,
-            TicketStatus.REPAIRING,
-            TicketStatus.READY
-        ) && !isPaid && !isWarranty && estimateRub > 0
+            TicketStatus.DIAGNOSING,
+            TicketStatus.WAITING_PARTS
+        ) && diagnosticsDone && !isPaid && !isWarranty && estimateRub > 0
 
     val canToggleWarranty: Boolean
         get() = status == TicketStatus.NEW
@@ -51,7 +50,10 @@ data class RepairTicket(
         get() = status == TicketStatus.NEW
 
     val canStartRepair: Boolean
-        get() = status == TicketStatus.WAITING_PARTS &&
+        get() = status in listOf(
+            TicketStatus.DIAGNOSING,
+            TicketStatus.WAITING_PARTS
+        ) &&
             diagnosticsDone &&
             partsInStock &&
             clientApproved &&
@@ -76,7 +78,11 @@ data class RepairTicket(
     val statusTitle: String
         get() = when (status) {
             TicketStatus.NEW -> "Новая заявка"
-            TicketStatus.DIAGNOSING -> "На диагностике"
+            TicketStatus.DIAGNOSING -> if (diagnosticsDone) {
+                "Диагностика завершена"
+            } else {
+                "На диагностике"
+            }
             TicketStatus.WAITING_PARTS -> "Ожидание запчастей"
             TicketStatus.REPAIRING -> "В ремонте"
             TicketStatus.READY -> "Готов к выдаче"
