@@ -61,6 +61,7 @@ fun AppNavigation(
                 TicketDetailScreen(
                     state = viewModel.uiState,
                     onBack = close,
+                    onRenameDevice = viewModel::renameDevice,
                     onStartDiagnostics = viewModel::startDiagnostics,
                     onFinishDiagnostics = viewModel::finishDiagnostics,
                     onMarkPartsArrived = viewModel::markPartsArrived,

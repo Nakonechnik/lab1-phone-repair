@@ -14,14 +14,22 @@ class RepairRepository {
 
     fun ticket(id: String): RepairTicket? = tickets.find { it.id == id }
 
-    fun addTicket() {
+    fun addTicket(deviceName: String) {
+        val name = deviceName.trim()
+        if (name.isEmpty()) return
         val number = "SC-$nextNumber"
         nextNumber += 1
         tickets = tickets + RepairTicket(
             id = number,
             ticketNumber = number,
-            deviceName = "Новое устройство"
+            deviceName = name
         )
+    }
+
+    fun renameDevice(id: String, deviceName: String) {
+        val name = deviceName.trim()
+        if (name.isEmpty()) return
+        update(id) { ticket -> ticket.copy(deviceName = name) }
     }
 
     fun removeTicket(id: String) {

@@ -40,4 +40,6 @@ class TicketDetailViewModel(
     fun reject() = repo.reject(ticketId)
 
     fun reset() = repo.reset(ticketId)
+
+    fun renameDevice(deviceName: String) = repo.renameDevice(ticketId, deviceName)
 }

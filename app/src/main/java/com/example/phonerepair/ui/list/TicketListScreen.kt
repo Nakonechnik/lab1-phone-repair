@@ -27,6 +27,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.phonerepair.model.RepairTicket
 import com.example.phonerepair.model.TicketStatus
+import com.example.phonerepair.ui.DeviceNameDialog
 import com.example.phonerepair.ui.theme.DangerRed
 import com.example.phonerepair.ui.theme.MutedGray
 import com.example.phonerepair.ui.theme.PrimaryBlue
@@ -45,10 +50,12 @@ import com.example.phonerepair.ui.theme.WarningAmber
 fun TicketListScreen(
     state: TicketListUiState,
     onOpenTicket: (String) -> Unit,
-    onAdd: () -> Unit,
+    onAdd: (String) -> Unit,
     onDelete: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -91,13 +98,25 @@ fun TicketListScreen(
         }
 
         FloatingActionButton(
-            onClick = onAdd,
+            onClick = { showAddDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Добавить заявку")
         }
+    }
+
+    if (showAddDialog) {
+        DeviceNameDialog(
+            title = "Новая заявка",
+            confirmLabel = "Создать",
+            onConfirm = { name ->
+                onAdd(name)
+                showAddDialog = false
+            },
+            onDismiss = { showAddDialog = false }
+        )
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.phonerepair.ui.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.phonerepair.model.RepairTicket
 import com.example.phonerepair.model.TicketStatus
+import com.example.phonerepair.ui.DeviceNameDialog
 import com.example.phonerepair.ui.theme.DangerRed
 import com.example.phonerepair.ui.theme.MutedGray
 import com.example.phonerepair.ui.theme.ReadyGreen
@@ -42,6 +48,7 @@ import com.example.phonerepair.ui.theme.WarningAmber
 fun TicketDetailScreen(
     state: TicketDetailUiState,
     onBack: () -> Unit,
+    onRenameDevice: (String) -> Unit,
     onStartDiagnostics: () -> Unit,
     onFinishDiagnostics: () -> Unit,
     onMarkPartsArrived: () -> Unit,
@@ -78,6 +85,7 @@ fun TicketDetailScreen(
 
     val screenBg = screenBackground(ticket)
     val actionsLocked = ticket.isTerminal
+    var showRenameDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -110,7 +118,10 @@ fun TicketDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
         StatusBanner(ticket)
         Spacer(modifier = Modifier.height(12.dp))
-        TicketInfoCard(ticket)
+        TicketInfoCard(
+            ticket = ticket,
+            onNameClick = { showRenameDialog = true }
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -209,6 +220,19 @@ fun TicketDetailScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
     }
+
+    if (showRenameDialog) {
+        DeviceNameDialog(
+            title = "Название устройства",
+            initialName = ticket.deviceName,
+            confirmLabel = "Сохранить",
+            onConfirm = { name ->
+                onRenameDevice(name)
+                showRenameDialog = false
+            },
+            onDismiss = { showRenameDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -276,7 +300,10 @@ private fun StatusBanner(ticket: RepairTicket) {
 private val PrimaryBlueBanner = Color(0xFF1D4ED8)
 
 @Composable
-private fun TicketInfoCard(ticket: RepairTicket) {
+private fun TicketInfoCard(
+    ticket: RepairTicket,
+    onNameClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -291,7 +318,14 @@ private fun TicketInfoCard(ticket: RepairTicket) {
             Text(
                 text = ticket.deviceName,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable(onClick = onNameClick)
+            )
+            Text(
+                text = "Нажмите на название, чтобы изменить",
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

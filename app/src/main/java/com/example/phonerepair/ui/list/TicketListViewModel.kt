@@ -14,7 +14,7 @@ class TicketListViewModel(
     val uiState: TicketListUiState
         get() = TicketListUiState(tickets = repo.tickets)
 
-    fun onAdd() = repo.addTicket()
+    fun onAdd(deviceName: String) = repo.addTicket(deviceName)
 
     fun onDelete(id: String) = repo.removeTicket(id)
 }
