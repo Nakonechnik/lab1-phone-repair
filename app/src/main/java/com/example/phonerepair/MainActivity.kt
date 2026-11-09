@@ -8,15 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.phonerepair.ui.RepairTicketScreen
+import com.example.phonerepair.navigation.AppNavigation
 import com.example.phonerepair.ui.theme.PhoneRepairTheme
-import com.example.phonerepair.viewmodel.RepairTicketViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val repo = (application as PhoneRepairApp).repository
         setContent {
             PhoneRepairTheme {
                 Surface(
@@ -24,8 +23,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .safeDrawingPadding()
                 ) {
-                    val viewModel: RepairTicketViewModel = viewModel()
-                    RepairTicketScreen(viewModel = viewModel)
+                    AppNavigation(repo = repo)
                 }
             }
         }

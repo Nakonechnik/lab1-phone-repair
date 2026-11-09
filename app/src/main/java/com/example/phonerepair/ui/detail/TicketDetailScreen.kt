@@ -1,4 +1,4 @@
-package com.example.phonerepair.ui
+package com.example.phonerepair.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -33,40 +37,80 @@ import com.example.phonerepair.ui.theme.MutedGray
 import com.example.phonerepair.ui.theme.ReadyGreen
 import com.example.phonerepair.ui.theme.TextSecondary
 import com.example.phonerepair.ui.theme.WarningAmber
-import com.example.phonerepair.viewmodel.RepairTicketViewModel
 
 @Composable
-fun RepairTicketScreen(viewModel: RepairTicketViewModel) {
-    val ticket = viewModel.ticket
-    val screenBg = screenBackground(ticket.status)
+fun TicketDetailScreen(
+    state: TicketDetailUiState,
+    onBack: () -> Unit,
+    onStartDiagnostics: () -> Unit,
+    onFinishDiagnostics: () -> Unit,
+    onMarkPartsArrived: () -> Unit,
+    onApproveByClient: () -> Unit,
+    onPay: () -> Unit,
+    onToggleWarranty: () -> Unit,
+    onIncreaseSeverity: () -> Unit,
+    onDecreaseSeverity: () -> Unit,
+    onStartRepair: () -> Unit,
+    onCompleteRepair: () -> Unit,
+    onIssueToClient: () -> Unit,
+    onReject: () -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val ticket = state.ticket
+    if (ticket == null) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Заявка не найдена",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            OutlinedButton(onClick = onBack) {
+                Text("Назад к списку")
+            }
+        }
+        return
+    }
+
+    val screenBg = screenBackground(ticket)
     val actionsLocked = ticket.isTerminal
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(screenBg)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "Сервисный центр",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Заявка на ремонт смартфона",
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Назад"
+                )
+            }
+            Column {
+                Text(
+                    text = "Карточка заявки",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = ticket.ticketNumber,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
-
         StatusBanner(ticket)
-
         Spacer(modifier = Modifier.height(12.dp))
-
         TicketInfoCard(ticket)
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -81,7 +125,7 @@ fun RepairTicketScreen(viewModel: RepairTicketViewModel) {
         PropertyRow("Согласие клиента", yesNo(ticket.clientApproved))
         PropertyRow("Оплачено", yesNo(ticket.isPaid))
         PropertyRow("Гарантийный ремонт", yesNo(ticket.isWarranty))
-        PropertyRow("Смета", if (ticket.estimateRub > 0) "${ticket.estimateRub} ₽" else "—")
+        PropertyRow("Смета", if (ticket.estimateRub > 0) "${ticket.estimateRub} руб." else "-")
 
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider()
@@ -98,72 +142,71 @@ fun RepairTicketScreen(viewModel: RepairTicketViewModel) {
             SeverityControls(
                 severity = ticket.severity,
                 enabled = ticket.canChangeSeverity && !actionsLocked,
-                onMinus = viewModel::decreaseSeverity,
-                onPlus = viewModel::increaseSeverity
+                onMinus = onDecreaseSeverity,
+                onPlus = onIncreaseSeverity
             )
             Spacer(modifier = Modifier.height(8.dp))
             ActionButton(
                 text = if (ticket.isWarranty) "Снять гарантию" else "Гарантийный ремонт",
                 enabled = ticket.canToggleWarranty && !actionsLocked,
-                onClick = viewModel::toggleWarranty
+                onClick = onToggleWarranty
             )
         }
 
         ActionButton(
             text = "Начать диагностику",
             enabled = ticket.canStartDiagnostics && !actionsLocked,
-            onClick = viewModel::startDiagnostics
+            onClick = onStartDiagnostics
         )
         ActionButton(
             text = "Завершить диагностику",
             enabled = ticket.canFinishDiagnostics && !actionsLocked,
-            onClick = viewModel::finishDiagnostics
+            onClick = onFinishDiagnostics
         )
         ActionButton(
             text = "Запчасти поступили",
             enabled = ticket.canMarkPartsArrived && !actionsLocked,
-            onClick = viewModel::markPartsArrived
+            onClick = onMarkPartsArrived
         )
         ActionButton(
             text = "Клиент согласовал смету",
             enabled = ticket.canApprove && !actionsLocked,
-            onClick = viewModel::approveByClient
+            onClick = onApproveByClient
         )
         ActionButton(
             text = "Оплатить ремонт",
             enabled = ticket.canPay && !actionsLocked,
-            onClick = viewModel::pay
+            onClick = onPay
         )
         ActionButton(
             text = "Начать ремонт",
             enabled = ticket.canStartRepair && !actionsLocked,
-            onClick = viewModel::startRepair
+            onClick = onStartRepair
         )
         ActionButton(
             text = "Завершить ремонт",
             enabled = ticket.canCompleteRepair && !actionsLocked,
-            onClick = viewModel::completeRepair
+            onClick = onCompleteRepair
         )
         ActionButton(
             text = "Выдать устройство",
             enabled = ticket.canIssue && !actionsLocked,
-            onClick = viewModel::issueToClient
+            onClick = onIssueToClient
         )
         ActionButton(
             text = "Отклонить заявку",
             enabled = ticket.canReject && !actionsLocked,
-            onClick = viewModel::reject,
+            onClick = onReject,
             containerColor = DangerRed
         )
 
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
-            onClick = viewModel::reset,
+            onClick = onReset,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Сбросить в исходное состояние")
         }
-
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -320,13 +363,14 @@ private fun ActionButton(
     }
 }
 
-private fun screenBackground(status: TicketStatus): Color {
-    return when (status) {
-        TicketStatus.REJECTED -> Color(0xFFFEE2E2)
-        TicketStatus.READY -> Color(0xFFDCFCE7)
-        TicketStatus.WAITING_PARTS -> Color(0xFFFEF3C7)
-        TicketStatus.ISSUED -> Color(0xFFE5E7EB)
-        TicketStatus.REPAIRING -> Color(0xFFDBEAFE)
+private fun screenBackground(ticket: RepairTicket): Color {
+    return when {
+        ticket.status == TicketStatus.REJECTED -> Color(0xFFFEE2E2)
+        ticket.status == TicketStatus.READY -> Color(0xFFDCFCE7)
+        ticket.status == TicketStatus.WAITING_PARTS -> Color(0xFFFEF3C7)
+        ticket.status == TicketStatus.ISSUED -> Color(0xFFE5E7EB)
+        ticket.status == TicketStatus.REPAIRING -> Color(0xFFDBEAFE)
+        ticket.status == TicketStatus.DIAGNOSING && ticket.diagnosticsDone -> Color(0xFFDBEAFE)
         else -> Color(0xFFF8FAFC)
     }
 }
