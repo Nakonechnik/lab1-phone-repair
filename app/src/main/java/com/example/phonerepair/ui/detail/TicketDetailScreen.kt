@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +50,7 @@ fun TicketDetailScreen(
     state: TicketDetailUiState,
     onBack: () -> Unit,
     onRenameDevice: (String) -> Unit,
+    onRetrySupplierInfo: () -> Unit,
     onStartDiagnostics: () -> Unit,
     onFinishDiagnostics: () -> Unit,
     onMarkPartsArrived: () -> Unit,
@@ -121,6 +123,11 @@ fun TicketDetailScreen(
         TicketInfoCard(
             ticket = ticket,
             onNameClick = { showRenameDialog = true }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        SupplierInfoCard(
+            state = state.supplierInfo,
+            onRetry = onRetrySupplierInfo
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -298,6 +305,76 @@ private fun StatusBanner(ticket: RepairTicket) {
 }
 
 private val PrimaryBlueBanner = Color(0xFF1D4ED8)
+
+@Composable
+private fun SupplierInfoCard(
+    state: SupplierInfoUiState,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Данные поставщика",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            when (state) {
+                SupplierInfoUiState.Loading -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        Text("Загружаем характеристики с сервера...")
+                    }
+                }
+                is SupplierInfoUiState.Content -> {
+                    Text(
+                        text = state.details.title,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = state.details.specs,
+                        color = TextSecondary
+                    )
+                }
+                SupplierInfoUiState.MissingLink -> {
+                    Text(
+                        text = "Заявка не привязана к каталогу. Действия по ремонту доступны офлайн.",
+                        color = TextSecondary
+                    )
+                }
+                SupplierInfoUiState.NotFound -> {
+                    Text(
+                        text = "Устройство не найдено в каталоге поставщика.",
+                        color = TextSecondary
+                    )
+                }
+                is SupplierInfoUiState.Error -> {
+                    Text(
+                        text = if (state.canRetry) {
+                            "Не удалось загрузить данные поставщика."
+                        } else {
+                            "Не удалось прочитать ответ сервера."
+                        }
+                    )
+                    if (state.canRetry) {
+                        Button(onClick = onRetry) {
+                            Text("Повторить")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun TicketInfoCard(

@@ -48,7 +48,8 @@ fun AppNavigation(
                         }
                     },
                     onAdd = viewModel::onAdd,
-                    onDelete = viewModel::onDelete
+                    onDelete = viewModel::onDelete,
+                    onRetryCatalog = viewModel::onRetryCatalog
                 )
             }
             entry<TicketDetailKey> { key ->
@@ -62,6 +63,7 @@ fun AppNavigation(
                     state = viewModel.uiState,
                     onBack = close,
                     onRenameDevice = viewModel::renameDevice,
+                    onRetrySupplierInfo = viewModel::onRetrySupplierInfo,
                     onStartDiagnostics = viewModel::startDiagnostics,
                     onFinishDiagnostics = viewModel::finishDiagnostics,
                     onMarkPartsArrived = viewModel::markPartsArrived,
