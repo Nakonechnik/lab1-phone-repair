@@ -11,8 +11,9 @@ enum class TicketStatus {
 }
 
 data class RepairTicket(
-    val ticketNumber: String = "SC-2401",
-    val deviceName: String = "Samsung Galaxy S23",
+    val id: String,
+    val ticketNumber: String,
+    val deviceName: String,
     val status: TicketStatus = TicketStatus.NEW,
     val severity: Int = 2,
     val diagnosticsDone: Boolean = false,
