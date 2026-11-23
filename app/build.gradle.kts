@@ -56,6 +56,11 @@ dependencies {
     implementation("androidx.navigation3:navigation3-runtime:1.2.0")
     implementation("androidx.navigation3:navigation3-ui:1.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("androidx.core:core-ktx:1.17.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

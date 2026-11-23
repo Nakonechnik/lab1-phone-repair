@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.phonerepair.model.RepairTicket
 import com.example.phonerepair.model.TicketStatus
-import com.example.phonerepair.ui.DeviceNameDialog
+import com.example.phonerepair.ui.CreateTicketDialog
 import com.example.phonerepair.ui.theme.DangerRed
 import com.example.phonerepair.ui.theme.MutedGray
 import com.example.phonerepair.ui.theme.PrimaryBlue
@@ -50,8 +50,9 @@ import com.example.phonerepair.ui.theme.WarningAmber
 fun TicketListScreen(
     state: TicketListUiState,
     onOpenTicket: (String) -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: (deviceName: String, catalogId: String?) -> Unit,
     onDelete: (String) -> Unit,
+    onRetryCatalog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
@@ -108,11 +109,11 @@ fun TicketListScreen(
     }
 
     if (showAddDialog) {
-        DeviceNameDialog(
-            title = "Новая заявка",
-            confirmLabel = "Создать",
-            onConfirm = { name ->
-                onAdd(name)
+        CreateTicketDialog(
+            catalog = state.catalog,
+            onRetryCatalog = onRetryCatalog,
+            onConfirm = { name, catalogId ->
+                onAdd(name, catalogId)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false }

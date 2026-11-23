@@ -14,6 +14,7 @@ data class RepairTicket(
     val id: String,
     val ticketNumber: String,
     val deviceName: String,
+    val catalogId: String? = null,
     val status: TicketStatus = TicketStatus.NEW,
     val severity: Int = 2,
     val diagnosticsDone: Boolean = false,
